@@ -6,6 +6,14 @@ VVP_FILE = $(OUTDIR)/tb.vvp
 VCD_FILE = $(OUTDIR)/tb.vcd
 XML_FILE = $(OUTDIR)/results.xml
 
+all: run
+
+$(OUTDIR):
+	mkdir -p $(OUTDIR)
+
+$(VVP_FILE): $(TB) $(SRC) | $(OUTDIR)
+	iverilog -o $(VVP_FILE) $(TB) $(SRC)
+
 run: $(VVP_FILE)
 	@echo "=== Running simulation ==="
 	@if vvp $(VVP_FILE); then \
