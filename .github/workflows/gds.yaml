@@ -13,20 +13,39 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install IHP SG13G2 PDK
+        run: |
+          mkdir -p /home/runner/pdk
+          git clone https://github.com/IHP-GmbH/IHP-Open-PDK.git /home/runner/pdk/ihp-sg13g2
+          cd /home/runner/pdk/ihp-sg13g2
+          make all
+
       - name: Build GDS
         uses: TinyTapeout/tt-gds-action@ttsky25a
         with:
-          pdk: sky130
+          pdk: ihp-sg13g2
           tools-ref: ttsky25a
 
   precheck:
     needs: gds
     runs-on: ubuntu-24.04
     steps:
+      - name: checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install IHP SG13G2 PDK
+        run: |
+          mkdir -p /home/runner/pdk
+          git clone https://github.com/IHP-GmbH/IHP-Open-PDK.git /home/runner/pdk/ihp-sg13g2
+          cd /home/runner/pdk/ihp-sg13g2
+          make all
+
       - name: Run Tiny Tapeout Precheck
         uses: TinyTapeout/tt-gds-action/precheck@ttsky25a
         with:
-          pdk: sky130
+          pdk: ihp-sg13g2
           tools-ref: ttsky25a
 
   gl_test:
@@ -38,18 +57,37 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install IHP SG13G2 PDK
+        run: |
+          mkdir -p /home/runner/pdk
+          git clone https://github.com/IHP-GmbH/IHP-Open-PDK.git /home/runner/pdk/ihp-sg13g2
+          cd /home/runner/pdk/ihp-sg13g2
+          make all
+
       - name: GL test
         uses: TinyTapeout/tt-gds-action/gl_test@ttsky25a
         with:
-          pdk: sky130
+          pdk: ihp-sg13g2
 
   viewer:
     needs: gds
     runs-on: ubuntu-24.04
     permissions:
-      pages: write      # to deploy to Pages
-      id-token: write   # to verify the deployment originates from an appropriate source
+      pages: write
+      id-token: write
     steps:
+      - name: checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install IHP SG13G2 PDK
+        run: |
+          mkdir -p /home/runner/pdk
+          git clone https://github.com/IHP-GmbH/IHP-Open-PDK.git /home/runner/pdk/ihp-sg13g2
+          cd /home/runner/pdk/ihp-sg13g2
+          make all
+
       - uses: TinyTapeout/tt-gds-action/viewer@ttsky25a
         with:
-          pdk: sky130
+          pdk: ihp-sg13g2
