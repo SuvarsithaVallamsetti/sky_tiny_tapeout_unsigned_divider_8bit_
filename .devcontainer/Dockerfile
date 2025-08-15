@@ -3,10 +3,10 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:${VARIANT}
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PDK_ROOT=/home/vscode/ttsetup/pdk
-ENV PDK=sky130A
+ENV PDK=ihp-sg13g2
 
 RUN apt update
-RUN apt install -y iverilog gtkwave python3 python3-pip python3-venv python3-tk python-is-python3 libcairo2 verilator libpng-dev libqhull-dev
+RUN apt install -y iverilog gtkwave python3 python3-pip python3-venv python3-tk python-is-python3 libcairo2 verilator libpng-dev libqhull-dev make git curl tar
 
 # Clone tt-support-tools
 RUN mkdir -p /ttsetup
@@ -22,6 +22,12 @@ RUN umask 022 && \
     curl -L https://github.com/chipsalliance/verible/releases/download/v0.0-3795-gf4d72375/verible-v0.0-3795-gf4d72375-linux-static-x86_64.tar.gz | \
     tar zxf - -C /usr/local --strip-components=1 && \
     chmod 755 /usr/local/bin
+
+# Install IHP SG13G2 PDK
+RUN mkdir -p ${PDK_ROOT} && \
+    git clone https://github.com/IHP-GmbH/IHP-Open-PDK.git ${PDK_ROOT}/${PDK} && \
+    cd ${PDK_ROOT}/${PDK} && \
+    make all
 
 # Install openlane
 RUN pip3 install openlane==2.2.9
