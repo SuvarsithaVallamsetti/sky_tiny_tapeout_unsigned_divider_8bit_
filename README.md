@@ -44,9 +44,7 @@ Designed for educational purposes, this project demonstrates how a high-bit-widt
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repo-link>
-   cd sky_tiny_tapeout_32bit_Unsigned_Divider
-   Run simulation
+  
 
 
 2. **Run simulation**
