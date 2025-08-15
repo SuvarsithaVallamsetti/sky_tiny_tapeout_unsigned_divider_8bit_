@@ -39,7 +39,7 @@ module tb;
         $system("mkdir -p test");
 
         // Prepare VCD output
-        $dumpfile("test/tb.vcd");
+        $dumpfile("./test/tb.vcd");
         $dumpvars(0, tb);
 
         // Init control signals
