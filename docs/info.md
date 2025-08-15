@@ -1,11 +1,4 @@
-# README_generator.py
-"""
-This script contains documentation text for the 8-bit unsigned divider Tiny Tapeout project.
-You can print, write to file, or embed it into your README.md.
-"""
 
-def get_readme():
-    content = """
 ## How it works
 This project is an **8-bit unsigned divider** designed in Verilog.
 It takes an 8-bit dividend and an 8-bit divisor as inputs and produces:
