@@ -14,7 +14,7 @@ To learn more and get started, visit https://tinytapeout.com.
 
 ## Project Overview
 
-This project implements a **32-bit unsigned hardware divider** in Verilog, compatible with the Tiny Tapeout submission flow.  
+This project implements a **8-bit unsigned hardware divider** in Verilog, compatible with the Tiny Tapeout submission flow.  
 It takes two 8-bit unsigned integers (`dividend` and `divisor`) and produces both the **quotient** and **remainder**.  
 Designed for educational purposes, this project demonstrates how a high-bit-width arithmetic unit can be integrated into a real silicon chip via Tiny Tapeout.
 
