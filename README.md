@@ -47,64 +47,62 @@ Designed for educational purposes, this project demonstrates how a high-bit-widt
    git clone <your-repo-link>
    cd sky_tiny_tapeout_32bit_Unsigned_Divider
    Run simulation
-2.Run simulation
 
-3.Generate GDS
-Follow Tiny Tapeout's synthesis & GDS flow.
 
-4.Submit to Tiny Tapeout
-Use Tiny Tapeout’s submission process for fabrication.
+2. **Run simulation**
+   Use the provided testbenches to validate division operations.
 
-Steps Followed
+3. **Generate GDS**
+   Follow Tiny Tapeout's synthesis & GDS flow.
 
-Project Setup – Cloned Tiny Tapeout template & configured structure.
+4. **Submit to Tiny Tapeout**
+   Use Tiny Tapeout’s submission process for fabrication.
 
-HDL Coding – Implemented divider core and I/O wrapper.
+---
 
-Simulation – Wrote testbench in Verilog/Cocotb and verified functionality.
+## Steps Followed
 
-Integration – Updated tt_project.yaml with correct pin mapping.
+- **Project Setup** – Cloned Tiny Tapeout template & configured structure.  
+- **HDL Coding** – Implemented divider core and I/O wrapper.  
+- **Simulation** – Wrote testbench in Verilog/Cocotb and verified functionality.  
+- **Integration** – Updated `tt_project.yaml` with correct pin mapping.  
+- **Synthesis & Verification** – Ran checks using Tiny Tapeout flow.  
+- **Submission** – Generated final GDS and submitted for shuttle run.  
 
-Synthesis & Verification – Ran checks using Tiny Tapeout flow.
+---
 
-Submission – Generated final GDS and submitted for shuttle run.
+## Testing & Results
 
-Testing & Results
+- **Simulation** – Verified with various test cases, including edge cases (divide by 1, max values).  
+- **Post-fabrication** – To be tested on real silicon after chip arrival.  
+- **Waveforms** – Confirmed correct outputs in GTKWave.  
 
-Simulation – Verified with various test cases, including edge cases (divide by 1, max values).
+---
 
-Post-fabrication – To be tested on real silicon after chip arrival.
+## Acknowledgements
 
-Waveforms – Confirmed correct outputs in GTKWave.
+- Tiny Tapeout community and maintainers.  
+- Open-source EDA tool developers.  
+- Contributors to testing and code review.  
 
-Acknowledgements
+---
 
-Tiny Tapeout community and maintainers.
+## Resources
 
-Open-source EDA tool developers.
+- [FAQ](https://tinytapeout.com/faq/)  
+- [Digital design lessons](https://tinytapeout.com/digital_design/)  
+- [Learn how semiconductors work](https://tinytapeout.com/siliwiz/)  
+- [Join the community](https://tinytapeout.com/discord)  
+- [Local hardening guide](https://www.tinytapeout.com/guides/local-hardening/)  
 
-Contributors to testing and code review.
+---
 
-Resources
+## What next?
 
-FAQ
+- [Submit your design to the next shuttle](https://app.tinytapeout.com/)  
+- Share your project:  
+  - LinkedIn [#tinytapeout](https://www.linkedin.com/search/results/content/?keywords=%23tinytapeout) [@TinyTapeout](https://www.linkedin.com/company/100708654/)  
+  - Mastodon [#tinytapeout](https://chaos.social/tags/tinytapeout) [@matthewvenn](https://chaos.social/@matthewvenn)  
+  - X (Twitter) [#tinytapeout](https://twitter.com/hashtag/tinytapeout) [@tinytapeout](https://twitter.com/tinytapeout)  
+"""
 
-Digital design lessons
-
-Learn how semiconductors work
-
-Join the community
-
-Local hardening guide
-
-What next?
-
-Submit your design to the next shuttle
-
-Share your project:
-
-LinkedIn #tinytapeout @TinyTapeout
-
-Mastodon #tinytapeout @matthewvenn
-
-X (Twitter) #tinytapeout @tinytapeout
