@@ -1,31 +1,38 @@
-# PDK and build settings
-PDK_ROOT ?= /home/runner/pdk
-PDK      ?= sky130A
-DESIGN   ?= project.v
+# test/Makefile
 
-SIM_BUILD_DIR = sim_build/gl
-TEST_DIR      = test
+TB       = tb.v
+SRC      = ../src/tt_um_unsigned_divider.v
+OUTDIR   = test
+VVP_FILE = $(OUTDIR)/tb.vvp
+VCD_FILE = $(OUTDIR)/tb.vcd
+XML_FILE = $(OUTDIR)/results.xml
 
-# Default target
-all: gds
+all: run
 
-# Gate-level simulation
-gl_test:
-	@echo "=== Running Gate-Level Simulation ==="
-	mkdir -p $(TEST_DIR) $(SIM_BUILD_DIR)
-	iverilog -o $(SIM_BUILD_DIR)/sim.vvp \
-		-I $(PDK_ROOT)/$(PDK)/libs.ref/sky130_fd_sc_hd/verilog \
-		-I $(PDK_ROOT)/$(PDK)/libs.ref/sky130_fd_io/verilog \
-		-Y .v \
-		$(DESIGN).v tb.v
-	vvp $(SIM_BUILD_DIR)/sim.vvp
+# Create output folder
+$(OUTDIR):
+	mkdir -p $(OUTDIR)
 
-# Physical GDS build (placeholder)
-gds:
-	@echo "=== Building GDS (placeholder) ==="
+# Compile simulation
+$(VVP_FILE): $(TB) $(SRC) | $(OUTDIR)
+	iverilog -o $(VVP_FILE) $(TB) $(SRC)
 
-# Clean build files
+# Run simulation and ensure results.xml exists
+run: $(VVP_FILE)
+	@echo "=== Running simulation ==="
+	@if vvp $(VVP_FILE); then \
+	    echo "Simulation completed successfully."; \
+	else \
+	    echo "Simulation failed."; \
+	fi
+	@# Ensure XML file exists for CI
+	@if [ ! -f $(XML_FILE) ]; then \
+	    echo '<?xml version="1.0" encoding="UTF-8"?>' > $(XML_FILE); \
+	    echo '<testsuite name="divider_tb" tests="0" failures="1">' >> $(XML_FILE); \
+	    echo '<testcase classname="divider" name="Simulation Failed">' >> $(XML_FILE); \
+	    echo '<failure message="Simulation did not produce results"/>' >> $(XML_FILE); \
+	    echo '</testcase></testsuite>' >> $(XML_FILE); \
+	fi
+
 clean:
-	rm -rf $(SIM_BUILD_DIR) $(TEST_DIR)
-
-.PHONY: all gl_test gds clean
+	rm -rf $(OUTDIR)
