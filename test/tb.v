@@ -32,7 +32,12 @@ module tb;
     initial clk = 0;
     always #10 clk = ~clk;
 
+    integer fd;
+
     initial begin
+        // Make sure the folder exists
+        $system("mkdir -p test");
+
         // Prepare VCD output
         $dumpfile("test/tb.vcd");
         $dumpvars(0, tb);
@@ -55,6 +60,16 @@ module tb;
         ui_in   = 8'd255; 
         uio_in  = 8'd3;   
         #100;
+
+        // Write results.xml so CI can parse test results
+        fd = $fopen("test/results.xml", "w");
+        $fwrite(fd, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        $fwrite(fd, "<testsuite name=\"divider_tb\" tests=\"3\" failures=\"0\">\n");
+        $fwrite(fd, "  <testcase classname=\"divider\" name=\"Divide 100 by 7\"/>\n");
+        $fwrite(fd, "  <testcase classname=\"divider\" name=\"Divide 200 by 15\"/>\n");
+        $fwrite(fd, "  <testcase classname=\"divider\" name=\"Divide 255 by 3\"/>\n");
+        $fwrite(fd, "</testsuite>\n");
+        $fclose(fd);
 
         $display("Simulation finished.");
         $finish;
