@@ -1,44 +1,31 @@
-# Paths
+# PDK and build settings
 PDK_ROOT ?= /home/runner/pdk
 PDK      ?= sky130A
-STD_CELL_DIR := $(PDK_ROOT)/$(PDK)/libs.ref/sky130_fd_sc_hd/verilog
-STD_IO_DIR   := $(PDK_ROOT)/$(PDK)/libs.ref/sky130_fd_io/verilog
+DESIGN   ?= project.v
 
-BUILD_DIR := sim_build
-GL_DIR    := $(BUILD_DIR)/gl
-TEST_DIR  := test
+SIM_BUILD_DIR = sim_build/gl
+TEST_DIR      = test
 
-# Files
-STD_CELL_FILES := \
-	$(STD_CELL_DIR)/primitives.v \
-	$(STD_CELL_DIR)/sky130_fd_sc_hd.v \
-	$(STD_IO_DIR)/sky130_fd_io.v
+# Default target
+all: gds
 
-GL_NETLIST := gate_level_netlist.v
-TB_FILE    := tb.v
+# Gate-level simulation
+gl_test:
+	@echo "=== Running Gate-Level Simulation ==="
+	mkdir -p $(TEST_DIR) $(SIM_BUILD_DIR)
+	iverilog -o $(SIM_BUILD_DIR)/sim.vvp \
+		-I $(PDK_ROOT)/$(PDK)/libs.ref/sky130_fd_sc_hd/verilog \
+		-I $(PDK_ROOT)/$(PDK)/libs.ref/sky130_fd_io/verilog \
+		-Y .v \
+		$(DESIGN).v tb.v
+	vvp $(SIM_BUILD_DIR)/sim.vvp
 
-IVERILOG_FLAGS := -g2012 -DFUNCTIONAL -DUSE_POWER_PINS -Wall
+# Physical GDS build (placeholder)
+gds:
+	@echo "=== Building GDS (placeholder) ==="
 
-all: gl_test
-
-gl_test: $(GL_DIR)/sim.vvp | $(TEST_DIR)
-	@echo "Running gate-level simulation..."
-	vvp $<
-	@echo "<testsuite></testsuite>" > $(TEST_DIR)/results.xml
-	@echo "Simulation complete."
-
-$(GL_DIR)/sim.vvp: $(GL_NETLIST) $(TB_FILE) $(STD_CELL_FILES) | $(GL_DIR)
-	iverilog $(IVERILOG_FLAGS) \
-		-I$(STD_CELL_DIR) \
-		-I$(STD_IO_DIR) \
-		-o $@ \
-		$^
-
-$(GL_DIR):
-	mkdir -p $@
-
-$(TEST_DIR):
-	mkdir -p $@
-
+# Clean build files
 clean:
-	rm -rf $(BUILD_DIR) $(TEST_DIR)
+	rm -rf $(SIM_BUILD_DIR) $(TEST_DIR)
+
+.PHONY: all gl_test gds clean
