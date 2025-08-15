@@ -13,35 +13,20 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install IHP SG13G2 PDK
-        run: |
-          mkdir -p /home/runner/pdk
-          git clone https://github.com/IHP-GmbH/IHP-Open-PDK.git /home/runner/pdk/ihp-sg13g2
-
       - name: Build GDS
         uses: TinyTapeout/tt-gds-action@ttsky25a
         with:
-          pdk: ihp-sg13g2
+          pdk: sky130
           tools-ref: ttsky25a
 
   precheck:
     needs: gds
     runs-on: ubuntu-24.04
     steps:
-      - name: checkout repo
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Install IHP SG13G2 PDK
-        run: |
-          mkdir -p /home/runner/pdk
-          git clone https://github.com/IHP-GmbH/IHP-Open-PDK.git /home/runner/pdk/ihp-sg13g2
-
       - name: Run Tiny Tapeout Precheck
         uses: TinyTapeout/tt-gds-action/precheck@ttsky25a
         with:
-          pdk: ihp-sg13g2
+          pdk: sky130
           tools-ref: ttsky25a
 
   gl_test:
@@ -53,33 +38,18 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install IHP SG13G2 PDK
-        run: |
-          mkdir -p /home/runner/pdk
-          git clone https://github.com/IHP-GmbH/IHP-Open-PDK.git /home/runner/pdk/ihp-sg13g2
-
       - name: GL test
         uses: TinyTapeout/tt-gds-action/gl_test@ttsky25a
         with:
-          pdk: ihp-sg13g2
+          pdk: sky130
 
   viewer:
     needs: gds
     runs-on: ubuntu-24.04
     permissions:
-      pages: write
-      id-token: write
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
     steps:
-      - name: checkout repo
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Install IHP SG13G2 PDK
-        run: |
-          mkdir -p /home/runner/pdk
-          git clone https://github.com/IHP-GmbH/IHP-Open-PDK.git /home/runner/pdk/ihp-sg13g2
-
       - uses: TinyTapeout/tt-gds-action/viewer@ttsky25a
         with:
-          pdk: ihp-sg13g2
+          pdk: sky130
