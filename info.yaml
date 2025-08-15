@@ -1,56 +1,48 @@
 # Tiny Tapeout project information
 project:
-  title:        "8-bit Unsigned Divider"       # Project title
-  author:       "Modalavalasa Tarun"            # Your name
-  discord:      "your_discord_username"         # Optional
-  description:  "Performs 32-bit unsigned integer division with quotient and remainder outputs"  
-  language:     "Verilog"                       # other examples include SystemVerilog, Amaranth, VHDL, etc
-  clock_hz:     0                               # Using asynchronous combinational logic, no clock
+  title:        "8-bit Unsigned Divider"
+  author:       "MODALAVALASA TARUN"
+  discord:      ""  # Optional
+  description:  "An 8-bit unsigned divider that calculates quotient and remainder"
+  language:     "Verilog"
+  clock_hz:     0       # Leave as 0 unless you're using a specific clock rate
+  tiles:        "1x1"
 
-  # How many tiles your design occupies? A single tile is about 167x108 uM.
-  tiles: "1x1"                                  # Fits in a single tile for Tiny Tapeout
+  top_module:   "tt_um_unsigned_divider"
 
-  # Your top module name must start with "tt_um_". Make it unique by including your github username:
-  top_module:  "tt_um_unsigned_divider"
-
-  # List your project's source files here.
-  # Source files must be in ./src and you must list each source file separately, one per line.
-  # Don't forget to also update `PROJECT_SOURCES` in test/Makefile.
   source_files:
     - "project.v"
 
-# The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
-# This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).
 pinout:
   # Inputs
-  ui[0]: "dividend[0]"
-  ui[1]: "dividend[1]"
-  ui[2]: "dividend[2]"
-  ui[3]: "dividend[3]"
-  ui[4]: "divisor[0]"
-  ui[5]: "divisor[1]"
-  ui[6]: "divisor[2]"
-  ui[7]: "divisor[3]"
+  ui[0]: "Dividend bit 0"
+  ui[1]: "Dividend bit 1"
+  ui[2]: "Dividend bit 2"
+  ui[3]: "Dividend bit 3"
+  ui[4]: "Dividend bit 4"
+  ui[5]: "Dividend bit 5"
+  ui[6]: "Dividend bit 6"
+  ui[7]: "Dividend bit 7"
 
-  # Outputs
-  uo[0]: "quotient[0]"
-  uo[1]: "quotient[1]"
-  uo[2]: "quotient[2]"
-  uo[3]: "quotient[3]"
-  uo[4]: "remainder[0]"
-  uo[5]: "remainder[1]"
-  uo[6]: "remainder[2]"
-  uo[7]: "remainder[3]"
+  # Outputs (example: quotient in upper nibble, remainder in lower nibble)
+  uo[0]: "Remainder bit 0"
+  uo[1]: "Remainder bit 1"
+  uo[2]: "Remainder bit 2"
+  uo[3]: "Remainder bit 3"
+  uo[4]: "Quotient bit 0"
+  uo[5]: "Quotient bit 1"
+  uo[6]: "Quotient bit 2"
+  uo[7]: "Quotient bit 3"
 
   # Bidirectional pins
-  uio[0]: ""
-  uio[1]: ""
-  uio[2]: ""
-  uio[3]: ""
-  uio[4]: ""
-  uio[5]: ""
-  uio[6]: ""
-  uio[7]: ""
+  uio[0]: "Divisor bit 0"
+  uio[1]: "Divisor bit 1"
+  uio[2]: "Divisor bit 2"
+  uio[3]: "Divisor bit 3"
+  uio[4]: "Divisor bit 4"
+  uio[5]: "Divisor bit 5"
+  uio[6]: "Divisor bit 6"
+  uio[7]: "Divisor bit 7"
 
 # Do not change!
 yaml_version: 6
