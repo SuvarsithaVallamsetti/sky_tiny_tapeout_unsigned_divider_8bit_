@@ -1,7 +1,7 @@
 # Paths
 OUTDIR   = test
 TB       = tb.v          # testbench file
-SRC      = ../project.v     # <-- updated path
+SRC      = ./src/project.v     # <-- updated path
 VVP_FILE = $(OUTDIR)/tb.vvp
 VCD_FILE = $(OUTDIR)/tb.vcd
 XML_FILE = $(OUTDIR)/results.xml
