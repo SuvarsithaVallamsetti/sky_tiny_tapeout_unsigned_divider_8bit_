@@ -1,55 +1,58 @@
+`default_nettype none
 `timescale 1ns / 1ps
 
-module tb;
+// Tiny Tapeout top module
+module tt_um_unsigned_divider (
+    input  wire [7:0] ui_in,   // Dividend on ui_in[7:0]
+    output wire [7:0] uo_out,  // {Quotient[3:0], Remainder[3:0]}
+    input  wire [7:0] uio_in,  // Divisor on uio_in[3:0], rest unused
+    output wire [7:0] uio_out, // Unused outputs
+    output wire [7:0] uio_oe,  // Output enables
+    input  wire       clk,
+    input  wire       rst_n,
+    input  wire       ena
+);
 
-    reg  [7:0] ui_in = 0;
-    reg  [7:0] uio_in = 0;
-    reg clk = 0;
-    reg rst_n = 1;
-    reg ena = 1;
+    // Internal registers
+    reg [3:0] dividend;
+    reg [3:0] divisor;
+    reg [3:0] quotient;
+    reg [3:0] remainder;
 
-    wire [7:0] uo_out;
-    wire [7:0] uio_out;
-    wire [7:0] uio_oe;
+    reg [7:0] uo_out_reg;
 
-    tt_um_unsigned_divider uut (
-        .ui_in(ui_in),
-        .uo_out(uo_out),
-        .uio_in(uio_in),
-        .uio_out(uio_out),
-        .uio_oe(uio_oe),
-        .clk(clk),
-        .rst_n(rst_n),
-        .ena(ena)
-    );
+    // Fixed outputs for unused IO
+    assign uio_out = 8'd0;
+    assign uio_oe  = 8'd0;
 
-    always #5 clk = ~clk;
+    // Connect registered output to output port
+    assign uo_out = uo_out_reg;
 
-    initial begin
-        // Ensure test folder exists
-        $system("mkdir -p test");
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            dividend   <= 4'd0;
+            divisor    <= 4'd0;
+            quotient   <= 4'd0;
+            remainder  <= 4'd0;
+            uo_out_reg <= 8'd0;
+        end 
+        else if (ena) begin
+            dividend <= ui_in[7:4];  // Upper nibble = dividend
+            divisor  <= uio_in[3:0]; // Lower nibble of uio_in = divisor
 
-        // Enable waveform dumping
-        $dumpfile("test/tb.vcd");
-        $dumpvars(0, tb);
-
-        // Reset sequence
-        rst_n = 0;
-        #10;
-        rst_n = 1;
-
-        // Stimulus
-        ui_in = {4'd10, 4'd3}; #20;  // 10 / 3
-        ui_in = {4'd8,  4'd2}; #20;  // 8 / 2
-        ui_in = {4'd7,  4'd0}; #20;  // divide by zero
-
-        // Create results.xml
-        integer fd;
-        fd = $fopen("test/results.xml", "w");
-        $fwrite(fd, "<testsuite><testcase classname='tb' name='divider_test'/></testsuite>");
-        $fclose(fd);
-
-        $finish;
+            if (uio_in[3:0] == 4'd0) begin
+                // Divide by zero → all ones
+                quotient   <= 4'hF;
+                remainder  <= 4'hF;
+                uo_out_reg <= 8'hFF;
+            end 
+            else begin
+                quotient   <= ui_in[7:4] / uio_in[3:0];
+                remainder  <= ui_in[7:4] % uio_in[3:0];
+                uo_out_reg <= {quotient, remainder};
+            end
+        end
     end
 
 endmodule
+`default_nettype wire
