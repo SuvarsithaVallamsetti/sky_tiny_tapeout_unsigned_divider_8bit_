@@ -8,7 +8,7 @@ jobs:
   gds:
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout repo
+      - name: checkout repo
         uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -25,15 +25,53 @@ jobs:
           ls -l /home/runner/pdk/ihp-sg13g2/libs.ref/sg13g2_io/verilog
 
       - name: Build GDS
-        uses: TinyTapeout/tt-gds-action@tt-v0.9
+        uses: TinyTapeout/tt-gds-action@ttsky25a
         with:
           pdk: sky130
-          tools-ref: tt-v0.9
+          tools-ref: ttsky25a
 
   precheck:
     needs: gds
     runs-on: ubuntu-24.04
     steps:
       - name: Run Tiny Tapeout Precheck
-        uses: TinyTapeout/tt-gds-action/precheck@tt-v0.9
+        uses: TinyTapeout/tt-gds-action/precheck@ttsky25a
         with:
+          pdk: sky130
+          tools-ref: ttsky25a
+
+  gl_test:
+    needs: gds
+    runs-on: ubuntu-24.04
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      # Patch or download sg13g2_io.v for GL test step
+      - name: Patch sg13g2_io.v
+        run: |
+          mkdir -p /home/runner/pdk/ihp-sg13g2/libs.ref/sg13g2_io/verilog
+          if ! find /home/runner/pdk/ihp-sg13g2 -name "sg13g2_io.v" -exec cp {} /home/runner/pdk/ihp-sg13g2/libs.ref/sg13g2_io/verilog/ \; ; then
+            echo "sg13g2_io.v not found locally — downloading..."
+            curl -L https://raw.githubusercontent.com/IHP-GmbH/sg13g2_pdk/main/libs.ref/sg13g2_io/verilog/sg13g2_io.v \
+              -o /home/runner/pdk/ihp-sg13g2/libs.ref/sg13g2_io/verilog/sg13g2_io.v
+          fi
+          ls -l /home/runner/pdk/ihp-sg13g2/libs.ref/sg13g2_io/verilog
+
+      - name: GL test
+        uses: TinyTapeout/tt-gds-action/gl_test@ttsky25a
+        with:
+          pdk: sky130
+
+  viewer:
+    needs: gds
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - uses: TinyTapeout/tt-gds-action/viewer@ttsky25a
+        with:
+          pdk: sky130
