@@ -1,20 +1,46 @@
-<!---
+# README_generator.py
+"""
+This script contains documentation text for the 8-bit unsigned divider Tiny Tapeout project.
+You can print, write to file, or embed it into your README.md.
+"""
 
-This file is used to generate your project datasheet. Please fill in the information below and delete any unused
-sections.
-
-You can also include images in this folder and reference them in the markdown. Each image must be less than
-512 kb in size, and the combined size of all images must be less than 1 MB.
--->
-
+def get_readme():
+    content = """
 ## How it works
+This project is an **8-bit unsigned divider** designed in Verilog.
+It takes an 8-bit dividend and an 8-bit divisor as inputs and produces:
+- **8-bit Quotient** → dividend / divisor
+- **8-bit Remainder** → dividend % divisor
 
-Explain how your project works
+### Main components:
+- **Division Logic**: Implements unsigned division.
+- **Quotient Output**: Holds the integer division result.
+- **Remainder Output**: Holds the remainder after division.
+- **Tiny Tapeout-Compatible Interface**: Inputs and outputs are mapped to the 8 available user pins (`ui` and `uo`).
+
+The design operates combinationally, producing results immediately after inputs are applied.
+
+---
 
 ## How to test
+To test this divider:
 
-Explain how to use your project
+1. Ensure all Verilog source files (e.g., `divider8.v`) are in the `src/` directory.
+2. Navigate to the `test/` folder.
+3. Run the cocotb-based testbench:
+   ```bash
+   cd test
+   make
+4. The testbench:
+     - Sets input values for dividend and divisor
+     - Waits for the design to compute
+     - Reads the quotient and remainder outputs
+     - Uses assertions to check correctness
 
-## External hardware
+5. To try different values:
+     - Open the `test_divider.py` file in the `test/` directory
+     - Modify the `test_vectors` list to include your own dividend/divisor pairs
 
-List external hardware used in your project (e.g. PMOD, LED display, etc), if any
+External hardware
+-----------------
+Not applicable — this project runs entirely in simulation and does not require external hardware.
