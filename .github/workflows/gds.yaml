@@ -17,8 +17,6 @@ jobs:
         run: |
           mkdir -p /home/runner/pdk
           git clone https://github.com/IHP-GmbH/IHP-Open-PDK.git /home/runner/pdk/ihp-sg13g2
-          cd /home/runner/pdk/ihp-sg13g2
-          make all
 
       - name: Build GDS
         uses: TinyTapeout/tt-gds-action@ttsky25a
@@ -39,8 +37,6 @@ jobs:
         run: |
           mkdir -p /home/runner/pdk
           git clone https://github.com/IHP-GmbH/IHP-Open-PDK.git /home/runner/pdk/ihp-sg13g2
-          cd /home/runner/pdk/ihp-sg13g2
-          make all
 
       - name: Run Tiny Tapeout Precheck
         uses: TinyTapeout/tt-gds-action/precheck@ttsky25a
@@ -61,8 +57,6 @@ jobs:
         run: |
           mkdir -p /home/runner/pdk
           git clone https://github.com/IHP-GmbH/IHP-Open-PDK.git /home/runner/pdk/ihp-sg13g2
-          cd /home/runner/pdk/ihp-sg13g2
-          make all
 
       - name: GL test
         uses: TinyTapeout/tt-gds-action/gl_test@ttsky25a
@@ -85,8 +79,6 @@ jobs:
         run: |
           mkdir -p /home/runner/pdk
           git clone https://github.com/IHP-GmbH/IHP-Open-PDK.git /home/runner/pdk/ihp-sg13g2
-          cd /home/runner/pdk/ihp-sg13g2
-          make all
 
       - uses: TinyTapeout/tt-gds-action/viewer@ttsky25a
         with:
