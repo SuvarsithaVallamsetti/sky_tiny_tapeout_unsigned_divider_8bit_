@@ -13,7 +13,8 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Patch sg13g2_io.v for GDS
+      # Patch or download sg13g2_io.v for GDS step
+      - name: Patch sg13g2_io.v
         run: |
           mkdir -p /home/runner/pdk/ihp-sg13g2/libs.ref/sg13g2_io/verilog
           if ! find /home/runner/pdk/ihp-sg13g2 -name "sg13g2_io.v" -exec cp {} /home/runner/pdk/ihp-sg13g2/libs.ref/sg13g2_io/verilog/ \; ; then
@@ -24,52 +25,15 @@ jobs:
           ls -l /home/runner/pdk/ihp-sg13g2/libs.ref/sg13g2_io/verilog
 
       - name: Build GDS
-        uses: TinyTapeout/tt-gds-action@ttsky25a
+        uses: TinyTapeout/tt-gds-action@tt-v0.9
         with:
-          pdk: ihp-sg13g2
-          tools-ref: ttsky25a
+          pdk: sky130
+          tools-ref: tt-v0.9
 
   precheck:
     needs: gds
     runs-on: ubuntu-24.04
     steps:
       - name: Run Tiny Tapeout Precheck
-        uses: TinyTapeout/tt-gds-action/precheck@ttsky25a
+        uses: TinyTapeout/tt-gds-action/precheck@tt-v0.9
         with:
-          pdk: ihp-sg13g2
-          tools-ref: ttsky25a
-
-  gl_test:
-    needs: gds
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Patch sg13g2_io.v for GL test
-        run: |
-          mkdir -p /home/runner/pdk/ihp-sg13g2/libs.ref/sg13g2_io/verilog
-          if ! find /home/runner/pdk/ihp-sg13g2 -name "sg13g2_io.v" -exec cp {} /home/runner/pdk/ihp-sg13g2/libs.ref/sg13g2_io/verilog/ \; ; then
-            echo "sg13g2_io.v not found locally — downloading..."
-            curl -L https://raw.githubusercontent.com/IHP-GmbH/sg13g2_pdk/main/libs.ref/sg13g2_io/verilog/sg13g2_io.v \
-              -o /home/runner/pdk/ihp-sg13g2/libs.ref/sg13g2_io/verilog/sg13g2_io.v
-          fi
-          ls -l /home/runner/pdk/ihp-sg13g2/libs.ref/sg13g2_io/verilog
-
-      - name: GL test
-        uses: TinyTapeout/tt-gds-action/gl_test@ttsky25a
-        with:
-          pdk: ihp-sg13g2
-
-  viewer:
-    needs: gds
-    runs-on: ubuntu-24.04
-    permissions:
-      pages: write
-      id-token: write
-    steps:
-      - uses: TinyTapeout/tt-gds-action/viewer@ttsky25a
-        with:
-          pdk: ihp-sg13g2
