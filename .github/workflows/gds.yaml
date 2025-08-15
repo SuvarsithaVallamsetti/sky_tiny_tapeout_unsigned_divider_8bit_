@@ -38,6 +38,13 @@ jobs:
         with:
           submodules: recursive
 
+      # Patch for missing sg13g2_io.v
+      - name: Fix missing sg13g2_io.v
+        run: |
+          mkdir -p /home/runner/pdk/ihp-sg13g2/libs.ref/sg13g2_io/verilog
+          find /home/runner/pdk/ihp-sg13g2 -name sg13g2_io.v -exec cp {} /home/runner/pdk/ihp-sg13g2/libs.ref/sg13g2_io/verilog/ \; || true
+          ls -l /home/runner/pdk/ihp-sg13g2/libs.ref/sg13g2_io/verilog
+
       - name: GL test
         uses: TinyTapeout/tt-gds-action/gl_test@ttsky25a
         with:
@@ -47,8 +54,8 @@ jobs:
     needs: gds
     runs-on: ubuntu-24.04
     permissions:
-      pages: write      # to deploy to Pages
-      id-token: write   # to verify the deployment originates from an appropriate source
+      pages: write
+      id-token: write
     steps:
       - uses: TinyTapeout/tt-gds-action/viewer@ttsky25a
         with:
