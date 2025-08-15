@@ -32,3 +32,7 @@ run: $(VVP_FILE)
 	    echo '<failure message="Simulation failed"/>' >> $(XML_FILE); \
 	    echo '</testcase></testsuite>' >> $(XML_FILE); \
 	fi
+
+# Clean target for CI
+clean:
+	rm -f $(VVP_FILE) $(VCD_FILE) $(XML_FILE)
