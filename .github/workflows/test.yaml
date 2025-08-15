@@ -13,7 +13,6 @@ jobs:
       - name: Install iverilog
         run: sudo apt-get update && sudo apt-get install -y iverilog
 
-      # Set Python up and install cocotb
       - name: Setup python
         uses: actions/setup-python@v5
         with:
@@ -22,34 +21,85 @@ jobs:
       - name: Install Python packages
         run: pip install -r test/requirements.txt
 
-      - name: Run tests
+      # Functional test
+      - name: Run Functional Tests
         run: |
           cd test
           make clean
           make
-          # Disable exit-on-error for grep so it won't stop workflow if no matches
           set +e
           grep -q '<failure' results.xml
           GREP_EXIT=$?
           set -e
           if [ $GREP_EXIT -eq 0 ]; then
-            echo "Test failed."
+            echo "Functional test failed."
             exit 1
           else
-            echo "All tests passed."
+            echo "Functional tests passed."
           fi
 
-      - name: Test Summary
+      - name: Test Summary (Functional)
         uses: test-summary/action@v2.3
         with:
           paths: "test/results.xml"
         if: always()
 
-      - name: Upload VCD
+      - name: Upload Functional Test VCD
         if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-vcd
+          name: functional_test_vcd
+          path: |
+            test/tb.vcd
+            test/results.xml
+
+  gl_test:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install iverilog
+        run: sudo apt-get update && sudo apt-get install -y iverilog
+
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python packages
+        run: pip install -r test/requirements.txt
+
+      # Gate-level test
+      - name: Run GL Tests
+        run: |
+          cd test
+          make clean
+          make
+          set +e
+          grep -q '<failure' results.xml
+          GREP_EXIT=$?
+          set -e
+          if [ $GREP_EXIT -eq 0 ]; then
+            echo "Gate-level test failed."
+            exit 1
+          else
+            echo "Gate-level tests passed."
+          fi
+
+      - name: Test Summary (GL)
+        uses: test-summary/action@v2.3
+        with:
+          paths: "test/results.xml"
+        if: always()
+
+      - name: Upload GL VCD
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gatelevel_test_vcd
           path: |
             test/tb.vcd
             test/results.xml
