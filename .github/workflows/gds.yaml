@@ -8,13 +8,12 @@ jobs:
   gds:
     runs-on: ubuntu-24.04
     steps:
-      - name: checkout repo
+      - name: Checkout repo
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      # Patch or download sg13g2_io.v for GDS step
-      - name: Patch sg13g2_io.v
+      - name: Patch sg13g2_io.v for GDS
         run: |
           mkdir -p /home/runner/pdk/ihp-sg13g2/libs.ref/sg13g2_io/verilog
           if ! find /home/runner/pdk/ihp-sg13g2 -name "sg13g2_io.v" -exec cp {} /home/runner/pdk/ihp-sg13g2/libs.ref/sg13g2_io/verilog/ \; ; then
@@ -27,7 +26,7 @@ jobs:
       - name: Build GDS
         uses: TinyTapeout/tt-gds-action@ttsky25a
         with:
-          pdk: sky130
+          pdk: ihp-sg13g2
           tools-ref: ttsky25a
 
   precheck:
@@ -37,20 +36,19 @@ jobs:
       - name: Run Tiny Tapeout Precheck
         uses: TinyTapeout/tt-gds-action/precheck@ttsky25a
         with:
-          pdk: sky130
+          pdk: ihp-sg13g2
           tools-ref: ttsky25a
 
   gl_test:
     needs: gds
     runs-on: ubuntu-24.04
     steps:
-      - name: checkout repo
+      - name: Checkout repo
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      # Patch or download sg13g2_io.v for GL test step
-      - name: Patch sg13g2_io.v
+      - name: Patch sg13g2_io.v for GL test
         run: |
           mkdir -p /home/runner/pdk/ihp-sg13g2/libs.ref/sg13g2_io/verilog
           if ! find /home/runner/pdk/ihp-sg13g2 -name "sg13g2_io.v" -exec cp {} /home/runner/pdk/ihp-sg13g2/libs.ref/sg13g2_io/verilog/ \; ; then
@@ -63,7 +61,7 @@ jobs:
       - name: GL test
         uses: TinyTapeout/tt-gds-action/gl_test@ttsky25a
         with:
-          pdk: sky130
+          pdk: ihp-sg13g2
 
   viewer:
     needs: gds
@@ -74,4 +72,4 @@ jobs:
     steps:
       - uses: TinyTapeout/tt-gds-action/viewer@ttsky25a
         with:
-          pdk: sky130
+          pdk: ihp-sg13g2
