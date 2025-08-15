@@ -34,12 +34,12 @@ IVERILOG_FLAGS := -g2012 -Wall
 all: gl_test
 
 # Gate-level simulation
-gl_test: $(BUILD_DIR)/gl/sim.vvp
+gl_test: $(BUILD_DIR)/gl/sim.vvp | $(TB_DIR)
 	@echo "Running GL simulation..."
 	vvp $<
 
 # Compile gate-level simulation
-$(BUILD_DIR)/gl/sim.vvp: $(GL_NETLIST) $(TB_FILE) $(STD_CELL_FILES) | $(BUILD_DIR)/gl
+$(BUILD_DIR)/gl/sim.vvp: $(GL_NETLIST) $(TB_FILE) $(STD_CELL_FILES) | $(BUILD_DIR)/gl $(TB_DIR)
 	iverilog $(IVERILOG_FLAGS) \
 		-I$(RTL_DIR) \
 		-I$(STD_CELL_DIR) \
@@ -47,7 +47,11 @@ $(BUILD_DIR)/gl/sim.vvp: $(GL_NETLIST) $(TB_FILE) $(STD_CELL_FILES) | $(BUILD_DI
 		-o $@ \
 		$^
 
+# Ensure build and test directories exist
 $(BUILD_DIR)/gl:
+	mkdir -p $@
+
+$(TB_DIR):
 	mkdir -p $@
 
 # Clean
