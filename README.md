@@ -1,6 +1,6 @@
 ![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/test/badge.svg) ![](../../workflows/fpga/badge.svg)
 
-# sky_tiny_tapeout_32bit_Unsigned_Divider
+# sky_tiny_tapeout_8bit_Unsigned_Divider
 
 - [Read the documentation for this project](docs/info.md)
 
