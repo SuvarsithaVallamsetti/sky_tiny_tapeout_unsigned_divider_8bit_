@@ -1,63 +1,57 @@
-# Makefile
-# See https://docs.cocotb.org/en/stable/quickstart.html for more info
+# ---------------------------
+# Project variables
+# ---------------------------
+PDK_ROOT ?= /path/to/your/pdk
+PDK      ?= sky130A
 
-# Defaults
-SIM ?= icarus
-TOPLEVEL_LANG ?= verilog
-SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = project.v
+# Design files
+RTL_DIR        := rtl
+TB_DIR         := test
+BUILD_DIR      := sim_build
 
-# PDK root and name should be set by CI or environment
-PDK_ROOT ?= /home/runner/pdk
-PDK ?= sky130
+# Standard cell libraries for GL simulation
+STD_CELL_DIR   := $(PDK_ROOT)/$(PDK)/libs.ref/sky130_fd_sc_hd/verilog
+STD_IO_DIR     := $(PDK_ROOT)/$(PDK)/libs.ref/sky130_fd_io/verilog
 
-ifneq ($(GATES),yes)
+STD_CELL_FILES := \
+	$(STD_CELL_DIR)/primitives.v \
+	$(STD_CELL_DIR)/sky130_fd_sc_hd.v \
+	$(STD_IO_DIR)/sky130_fd_io.v
 
-# ------------------------------
-# RTL simulation
-# ------------------------------
-SIM_BUILD         = sim_build/rtl
-VERILOG_SOURCES  += $(addprefix $(SRC_DIR)/,$(PROJECT_SOURCES))
+# Your synthesized netlist (GL)
+GL_NETLIST := gate_level_netlist.v
 
-else
+# Testbench
+TB_FILE := $(TB_DIR)/tb.v
 
-# ------------------------------
-# Gate level simulation
-# ------------------------------
-SIM_BUILD         = sim_build/gl
-COMPILE_ARGS    += -DGL_TEST
-COMPILE_ARGS    += -DFUNCTIONAL
-COMPILE_ARGS    += -DSIM
+# Icarus Verilog compile flags
+IVERILOG_FLAGS := -g2012 -Wall
 
-# Select correct standard cell + IO library based on PDK
-ifeq ($(PDK),sky130)
-    VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_io/verilog/sky130_fd_io.v
-    VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_fd_sc_hd.v
-else ifeq ($(PDK),sky130A)
-    VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_io/verilog/sky130_fd_io.v
-    VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_fd_sc_hd.v
-else ifeq ($(PDK),ihp-sg13g2)
-    VERILOG_SOURCES += $(PDK_ROOT)/ihp-sg13g2/libs.ref/sg13g2_io/verilog/sg13g2_io.v
-    VERILOG_SOURCES += $(PDK_ROOT)/ihp-sg13g2/libs.ref/sg13g2_stdcell/verilog/sg13g2_stdcell.v
-else
-    $(error Unsupported PDK: $(PDK))
-endif
+# ---------------------------
+# Targets
+# ---------------------------
 
+all: gl_test
 
-# Gate-level netlist (provided by GDS action workflow)
-VERILOG_SOURCES += $(PWD)/gate_level_netlist.v
+# Gate-level simulation
+gl_test: $(BUILD_DIR)/gl/sim.vvp
+	@echo "Running GL simulation..."
+	vvp $<
 
-endif
+# Compile gate-level simulation
+$(BUILD_DIR)/gl/sim.vvp: $(GL_NETLIST) $(TB_FILE) $(STD_CELL_FILES) | $(BUILD_DIR)/gl
+	iverilog $(IVERILOG_FLAGS) \
+		-I$(RTL_DIR) \
+		-I$(STD_CELL_DIR) \
+		-I$(STD_IO_DIR) \
+		-o $@ \
+		$^
 
-# Allow sharing configuration between design and testbench via `include`:
-COMPILE_ARGS += -I$(SRC_DIR)
+$(BUILD_DIR)/gl:
+	mkdir -p $@
 
-# Include the testbench sources:
-VERILOG_SOURCES += $(PWD)/tb.v
-TOPLEVEL = tb
+# Clean
+clean:
+	rm -rf $(BUILD_DIR) $(TB_DIR)/*.vcd $(TB_DIR)/*.xml
 
-# MODULE is the basename of the Python test file
-MODULE = test
-
-# Include cocotb's make rules to take care of the simulator setup
-include $(shell cocotb-config --makefiles)/Makefile.sim
+.PHONY: all gl_test clean
