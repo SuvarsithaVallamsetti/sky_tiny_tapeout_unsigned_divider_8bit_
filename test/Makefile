@@ -1,23 +1,19 @@
-# Files & directories
+# Paths
 OUTDIR   = test
-TB       = $(OUTDIR)/tb.v
+TB       = tb.v  # <-- update to actual testbench filename
 SRC      = src/project.v
 VVP_FILE = $(OUTDIR)/tb.vvp
 VCD_FILE = $(OUTDIR)/tb.vcd
 XML_FILE = $(OUTDIR)/results.xml
 
-# Default
 all: run
 
-# Ensure test folder exists
 $(OUTDIR):
 	mkdir -p $(OUTDIR)
 
-# Compile testbench
 $(VVP_FILE): $(TB) $(SRC) | $(OUTDIR)
 	iverilog -o $(VVP_FILE) $(TB) $(SRC)
 
-# Run sim and always create results.xml
 run: $(VVP_FILE)
 	@echo "=== Running simulation ==="
 	@if vvp $(VVP_FILE); then \
@@ -33,6 +29,5 @@ run: $(VVP_FILE)
 	    echo '</testcase></testsuite>' >> $(XML_FILE); \
 	fi
 
-# Clean target for CI
 clean:
 	rm -f $(VVP_FILE) $(VCD_FILE) $(XML_FILE)
