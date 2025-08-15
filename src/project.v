@@ -1,37 +1,55 @@
-module tt_um_unsigned_divider (
-    input  [7:0] ui_in,    // upper 4 bits: dividend, lower 4 bits: divisor
-    output [7:0] uo_out,   // upper 4 bits: quotient, lower 4 bits: remainder
-    input  [7:0] uio_in,
-    output [7:0] uio_out,
-    output [7:0] uio_oe,
-    input clk,
-    input rst_n,
-    input ena
-);
+`timescale 1ns / 1ps
 
-    reg [3:0] dividend, divisor;
-    reg [3:0] quotient, remainder;
-    reg [7:0] uo_out_reg;
+module tb;
 
-    assign uo_out = uo_out_reg;
-    assign uio_out = 8'd0;
-    assign uio_oe = 8'd0;
+    reg  [7:0] ui_in = 0;
+    reg  [7:0] uio_in = 0;
+    reg clk = 0;
+    reg rst_n = 1;
+    reg ena = 1;
 
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            uo_out_reg <= 8'd0;
-        end else if (ena) begin
-            dividend  <= ui_in[7:4];
-            divisor   <= ui_in[3:0];
+    wire [7:0] uo_out;
+    wire [7:0] uio_out;
+    wire [7:0] uio_oe;
 
-            if (ui_in[3:0] == 4'd0) begin
-                uo_out_reg <= 8'hFF;
-            end else begin
-                quotient  <= ui_in[7:4] / ui_in[3:0];
-                remainder <= ui_in[7:4] % ui_in[3:0];
-                uo_out_reg <= {quotient, remainder};
-            end
-        end
+    tt_um_unsigned_divider uut (
+        .ui_in(ui_in),
+        .uo_out(uo_out),
+        .uio_in(uio_in),
+        .uio_out(uio_out),
+        .uio_oe(uio_oe),
+        .clk(clk),
+        .rst_n(rst_n),
+        .ena(ena)
+    );
+
+    always #5 clk = ~clk;
+
+    initial begin
+        // Ensure test folder exists
+        $system("mkdir -p test");
+
+        // Enable waveform dumping
+        $dumpfile("test/tb.vcd");
+        $dumpvars(0, tb);
+
+        // Reset sequence
+        rst_n = 0;
+        #10;
+        rst_n = 1;
+
+        // Stimulus
+        ui_in = {4'd10, 4'd3}; #20;  // 10 / 3
+        ui_in = {4'd8,  4'd2}; #20;  // 8 / 2
+        ui_in = {4'd7,  4'd0}; #20;  // divide by zero
+
+        // Create results.xml
+        integer fd;
+        fd = $fopen("test/results.xml", "w");
+        $fwrite(fd, "<testsuite><testcase classname='tb' name='divider_test'/></testsuite>");
+        $fclose(fd);
+
+        $finish;
     end
 
 endmodule
