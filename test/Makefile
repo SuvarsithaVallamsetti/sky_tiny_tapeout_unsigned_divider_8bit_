@@ -1,7 +1,7 @@
 # test/Makefile
 
 TB       = tb.v
-SRC      = ../src/project.v
+SRC      = ./src/project.v
 OUTDIR   = test
 VVP_FILE = $(OUTDIR)/tb.vvp
 VCD_FILE = $(OUTDIR)/tb.vcd
