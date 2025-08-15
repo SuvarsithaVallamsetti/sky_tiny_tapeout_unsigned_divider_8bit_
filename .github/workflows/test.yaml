@@ -30,7 +30,8 @@ jobs:
           make clean
           make
           # Check for failures in results.xml without failing if grep finds nothing
-          if grep -q "failure" results.xml; then
+          if grep -q '<failure' results.xml; then
+
             echo "Test failed."
             exit 1
           else
