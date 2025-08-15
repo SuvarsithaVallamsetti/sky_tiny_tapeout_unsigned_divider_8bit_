@@ -63,7 +63,7 @@
   "//": "Clock",
   "RUN_CTS": 1,
 
- // "//": "Don't use power rings or met5 layer",
+  "//": " use power rings or met5 layer",
   "FP_PDN_MULTILAYER": 0,
   "RT_MAX_LAYER": "met5",
 
