@@ -2,31 +2,59 @@
 
 module tb;
 
-    reg [7:0] dividend;
-    reg [7:0] divisor;
     reg clk;
+    reg rst_n;
+    reg ena;
 
-    wire [3:0] remainder;
-    wire [3:0] quotient;
+    reg  [7:0] ui_in;    // Dividend
+    wire [7:0] uo_out;   // {quotient[3:0], remainder[3:0]}
 
-    // Instantiate DUT
+    reg  [7:0] uio_in;   // Divisor input from TB
+    wire [7:0] uio_out;  // Not used here
+    wire [7:0] uio_oe;   // Output enable (DUT -> TB)
+
+    wire [3:0] quotient   = uo_out[7:4];
+    wire [3:0] remainder  = uo_out[3:0];
+
+    // Instantiate DUT with proper TT ports
     tt_um_unsigned_divider dut (
-        .ui_in(dividend),
-        .uo_out({quotient, remainder}),
-        .uio_inout(divisor),
-        .clk(clk)
+        .ui_in(ui_in),
+        .uo_out(uo_out),
+        .uio_in(uio_in),
+        .uio_out(uio_out),
+        .uio_oe(uio_oe),
+        .clk(clk),
+        .rst_n(rst_n),
+        .ena(ena)
     );
 
+    // Clock generation
     initial clk = 0;
     always #10 clk = ~clk;
 
     initial begin
+        // Prepare VCD output
         $dumpfile("test/tb.vcd");
         $dumpvars(0, tb);
 
-        dividend = 8'd100; divisor = 8'd7;  #100;
-        dividend = 8'd200; divisor = 8'd15; #100;
-        dividend = 8'd255; divisor = 8'd3;  #100;
+        // Init control signals
+        rst_n = 1;
+        ena   = 1;
+
+        // Test 1: 100 / 7
+        ui_in   = 8'd100; 
+        uio_in  = 8'd7;  
+        #100;
+
+        // Test 2: 200 / 15
+        ui_in   = 8'd200; 
+        uio_in  = 8'd15;  
+        #100;
+
+        // Test 3: 255 / 3
+        ui_in   = 8'd255; 
+        uio_in  = 8'd3;   
+        #100;
 
         $display("Simulation finished.");
         $finish;
