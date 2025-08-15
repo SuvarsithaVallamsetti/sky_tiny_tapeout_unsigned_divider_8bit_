@@ -1,7 +1,7 @@
 # test/Makefile
 
 TB       = tb.v
-SRC      = ../src/tt_um_unsigned_divider.v
+SRC      = ../src/project.v
 OUTDIR   = test
 VVP_FILE = $(OUTDIR)/tb.vvp
 VCD_FILE = $(OUTDIR)/tb.vcd
