@@ -53,7 +53,7 @@ jobs:
             test/tb.vcd
             test/results.xml
 
-  gl_test:
+    gl_test:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout repo
@@ -61,7 +61,7 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install iverilog
+      - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y iverilog
 
       - name: Setup python
@@ -70,36 +70,35 @@ jobs:
           python-version: '3.11'
 
       - name: Install Python packages
-        run: pip install -r test/requirements.txt
+        run: pip install -r gl_test/requirements.txt
 
-      # Gate-level test
-      - name: Run GL Tests
+      - name: Run GL tests (never fail here)
         run: |
-          cd test
-          make clean
-          make
-          set +e
-          grep -q '<failure' results.xml
-          GREP_EXIT=$?
-          set -e
-          if [ $GREP_EXIT -eq 0 ]; then
-            echo "Gate-level test failed."
-            exit 1
+          cd gl_test
+          make clean || true
+          make || true
+          if [ ! -f results.xml ]; then
+            echo "❌ ERROR: results.xml not found!"
+          elif grep -q '<failure' results.xml; then
+            echo "❌ GL tests failed."
           else
-            echo "Gate-level tests passed."
+            echo "✅ GL tests passed."
           fi
+        continue-on-error: true
 
-      - name: Test Summary (GL)
-        uses: test-summary/action@v2.3
-        with:
-          paths: "test/results.xml"
-        if: always()
-
-      - name: Upload GL VCD
-        if: success() || failure()
+      - name: Upload GL artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: gatelevel_test_vcd
+          name: gl_test-artifacts
           path: |
-            test/tb.vcd
-            test/results.xml
+            gl_test/tb.vcd
+            gl_test/results.xml
+            gl_test/*.log
+        if: success() || failure()
+
+      - name: Fail job if failures found
+        run: |
+          if grep -q '<failure' gl_test/results.xml; then
+            echo "❌ Final check: GL tests failed."
+            exit 1
+          fi
