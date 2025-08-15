@@ -11,7 +11,6 @@ jobs:
           submodules: recursive
 
       - name: Install iverilog
-        shell: bash
         run: sudo apt-get update && sudo apt-get install -y iverilog
 
       # Set Python up and install cocotb
@@ -21,7 +20,6 @@ jobs:
           python-version: '3.11'
 
       - name: Install Python packages
-        shell: bash
         run: pip install -r test/requirements.txt
 
       - name: Run tests
@@ -47,7 +45,7 @@ jobs:
           paths: "test/results.xml"
         if: always()
 
-      - name: upload vcd
+      - name: Upload VCD
         if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
