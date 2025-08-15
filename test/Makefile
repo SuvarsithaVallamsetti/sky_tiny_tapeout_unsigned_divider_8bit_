@@ -33,12 +33,16 @@ COMPILE_ARGS    += -DSIM
 ifeq ($(PDK),sky130)
     VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_io/verilog/sky130_fd_io.v
     VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_fd_sc_hd.v
+else ifeq ($(PDK),sky130A)
+    VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_io/verilog/sky130_fd_io.v
+    VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_fd_sc_hd.v
 else ifeq ($(PDK),ihp-sg13g2)
     VERILOG_SOURCES += $(PDK_ROOT)/ihp-sg13g2/libs.ref/sg13g2_io/verilog/sg13g2_io.v
     VERILOG_SOURCES += $(PDK_ROOT)/ihp-sg13g2/libs.ref/sg13g2_stdcell/verilog/sg13g2_stdcell.v
 else
     $(error Unsupported PDK: $(PDK))
 endif
+
 
 # Gate-level netlist (provided by GDS action workflow)
 VERILOG_SOURCES += $(PWD)/gate_level_netlist.v
