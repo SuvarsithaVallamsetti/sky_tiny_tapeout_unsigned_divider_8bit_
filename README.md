@@ -43,9 +43,6 @@ Designed for educational purposes, this project demonstrates how a high-bit-widt
 ## How to Use
 
 1. **Clone the repository**
-   ```bash
-  
-
 
 2. **Run simulation**
    Use the provided testbenches to validate division operations.
