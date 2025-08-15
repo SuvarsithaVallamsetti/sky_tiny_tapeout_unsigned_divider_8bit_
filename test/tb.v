@@ -34,7 +34,7 @@ module tb;
 
     initial begin
         // Output dump
-        $dumpfile("test/tb.vcd");
+       $dumpfile("tb.vcd");
         $dumpvars(0, tb);
 
         rst_n = 1;
