@@ -16,7 +16,7 @@ module tb;
     wire [3:0] quotient  = uo_out[7:4];
     wire [3:0] remainder = uo_out[3:0];
 
-    // DUT instance
+    // DUT
     tt_um_unsigned_divider dut (
         .ui_in(ui_in),
         .uo_out(uo_out),
@@ -28,11 +28,12 @@ module tb;
         .ena(ena)
     );
 
-    // Clock generation
+    // Clock
     initial clk = 0;
     always #10 clk = ~clk;
 
     initial begin
+        // Output dump
         $dumpfile("test/tb.vcd");
         $dumpvars(0, tb);
 
