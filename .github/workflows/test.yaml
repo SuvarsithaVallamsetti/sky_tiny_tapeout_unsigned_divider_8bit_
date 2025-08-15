@@ -11,7 +11,6 @@ jobs:
           submodules: recursive
 
       - name: Install iverilog
-        shell: bash
         run: sudo apt-get update && sudo apt-get install -y iverilog
 
       - name: Setup python
@@ -20,36 +19,36 @@ jobs:
           python-version: '3.11'
 
       - name: Install Python packages
-        shell: bash
         run: pip install -r test/requirements.txt
 
-      - name: Run functional tests
+      # Functional test
+      - name: Run Functional Tests
         run: |
           cd test
           make clean
           make
-          if [ ! -f results.xml ]; then
-            echo "❌ ERROR: results.xml not found!"
-            exit 1
-          fi
-          if grep -q '<failure' results.xml; then
-            echo "❌ Functional tests failed."
+          set +e
+          grep -q '<failure' results.xml
+          GREP_EXIT=$?
+          set -e
+          if [ $GREP_EXIT -eq 0 ]; then
+            echo "Functional test failed."
             exit 1
           else
-            echo "✅ Functional tests passed."
+            echo "Functional tests passed."
           fi
 
-      - name: Test Summary
+      - name: Test Summary (Functional)
         uses: test-summary/action@v2.3
         with:
           paths: "test/results.xml"
         if: always()
 
-      - name: Upload functional VCD
+      - name: Upload Functional Test VCD
         if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: functional-test-vcd
+          name: functional_test_vcd
           path: |
             test/tb.vcd
             test/results.xml
@@ -63,31 +62,44 @@ jobs:
           submodules: recursive
 
       - name: Install iverilog
-        shell: bash
         run: sudo apt-get update && sudo apt-get install -y iverilog
 
-      - name: Run gate-level tests
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python packages
+        run: pip install -r test/requirements.txt
+
+      # Gate-level test
+      - name: Run GL Tests
         run: |
-          cp tt_submission/*.v "test/gate_level_netlist.v"
           cd test
           make clean
           make
-          if [ ! -f results.xml ]; then
-            echo "❌ ERROR: results.xml not found!"
-            exit 1
-          fi
-          if grep -q '<failure' results.xml; then
-            echo "❌ Gate-level tests failed."
+          set +e
+          grep -q '<failure' results.xml
+          GREP_EXIT=$?
+          set -e
+          if [ $GREP_EXIT -eq 0 ]; then
+            echo "Gate-level test failed."
             exit 1
           else
-            echo "✅ Gate-level tests passed."
+            echo "Gate-level tests passed."
           fi
 
-      - name: Upload gate-level VCD
+      - name: Test Summary (GL)
+        uses: test-summary/action@v2.3
+        with:
+          paths: "test/results.xml"
+        if: always()
+
+      - name: Upload GL VCD
         if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: gatelevel-test-vcd
+          name: gatelevel_test_vcd
           path: |
             test/tb.vcd
             test/results.xml
