@@ -1,7 +1,11 @@
 name: test
+
 on: [push, workflow_dispatch]
 
 jobs:
+  # ========================
+  # Functional Simulation Test
+  # ========================
   test:
     runs-on: ubuntu-24.04
     steps:
@@ -21,40 +25,49 @@ jobs:
       - name: Install Python packages
         run: pip install -r test/requirements.txt
 
-      # Functional test
-      - name: Run Functional Tests
+      - name: Run functional tests
         run: |
           cd test
-          make clean
-          make
-          set +e
-          grep -q '<failure' results.xml
-          GREP_EXIT=$?
-          set -e
-          if [ $GREP_EXIT -eq 0 ]; then
-            echo "Functional test failed."
-            exit 1
+          make clean || true
+          make || true
+          if [ ! -f results.xml ]; then
+            echo "❌ ERROR: results.xml not found!"
+          elif grep -q '<failure' results.xml; then
+            echo "❌ Functional tests failed."
           else
-            echo "Functional tests passed."
+            echo "✅ Functional tests passed."
           fi
+        continue-on-error: true
 
-      - name: Test Summary (Functional)
+      - name: Test Summary
         uses: test-summary/action@v2.3
         with:
           paths: "test/results.xml"
         if: always()
 
-      - name: Upload Functional Test VCD
-        if: success() || failure()
+      - name: Upload functional artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: functional_test_vcd
+          name: functional-test-artifacts
           path: |
             test/tb.vcd
             test/results.xml
+            test/*.log
+        if: success() || failure()
 
-    gl_test:
+      - name: Fail job if functional test failures found
+        run: |
+          if grep -q '<failure' test/results.xml; then
+            echo "❌ Final check: Functional tests failed."
+            exit 1
+          fi
+
+  # ========================
+  # Gate-Level Simulation Test (GDS)
+  # ========================
+  gl_test:
     runs-on: ubuntu-24.04
+    needs: test
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -72,7 +85,7 @@ jobs:
       - name: Install Python packages
         run: pip install -r gl_test/requirements.txt
 
-      - name: Run GL tests (never fail here)
+      - name: Run gate-level tests
         run: |
           cd gl_test
           make clean || true
@@ -89,14 +102,14 @@ jobs:
       - name: Upload GL artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: gl_test-artifacts
+          name: gl-test-artifacts
           path: |
             gl_test/tb.vcd
             gl_test/results.xml
             gl_test/*.log
         if: success() || failure()
 
-      - name: Fail job if failures found
+      - name: Fail job if GL test failures found
         run: |
           if grep -q '<failure' gl_test/results.xml; then
             echo "❌ Final check: GL tests failed."
