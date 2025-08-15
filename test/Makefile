@@ -6,7 +6,7 @@ PDK      ?= sky130A
 
 # Design files
 RTL_DIR        := rtl
-TB_DIR         := test
+TB_DIR         := .
 BUILD_DIR      := sim_build
 
 # Standard cell libraries for GL simulation
@@ -34,12 +34,13 @@ IVERILOG_FLAGS := -g2012 -Wall
 all: gl_test
 
 # Gate-level simulation
-gl_test: $(BUILD_DIR)/gl/sim.vvp | $(TB_DIR)
+gl_test: $(BUILD_DIR)/gl/sim.vvp
 	@echo "Running GL simulation..."
 	vvp $<
+	@echo "Simulation complete."
 
 # Compile gate-level simulation
-$(BUILD_DIR)/gl/sim.vvp: $(GL_NETLIST) $(TB_FILE) $(STD_CELL_FILES) | $(BUILD_DIR)/gl $(TB_DIR)
+$(BUILD_DIR)/gl/sim.vvp: $(GL_NETLIST) $(TB_FILE) $(STD_CELL_FILES) | $(BUILD_DIR)/gl
 	iverilog $(IVERILOG_FLAGS) \
 		-I$(RTL_DIR) \
 		-I$(STD_CELL_DIR) \
@@ -47,15 +48,11 @@ $(BUILD_DIR)/gl/sim.vvp: $(GL_NETLIST) $(TB_FILE) $(STD_CELL_FILES) | $(BUILD_DI
 		-o $@ \
 		$^
 
-# Ensure build and test directories exist
 $(BUILD_DIR)/gl:
-	mkdir -p $@
-
-$(TB_DIR):
 	mkdir -p $@
 
 # Clean
 clean:
-	rm -rf $(BUILD_DIR) $(TB_DIR)/*.vcd $(TB_DIR)/*.xml
+	rm -rf $(BUILD_DIR) *.vcd *.xml
 
 .PHONY: all gl_test clean
