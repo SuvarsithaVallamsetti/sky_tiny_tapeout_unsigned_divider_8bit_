@@ -28,13 +28,18 @@ jobs:
           make clean
           make
 
-          if [ ! -f results.xml ]; then
+          # Find results.xml (could be in test/ or sim_build/)
+          RESULT_FILE=$(find . -name "results.xml" | head -n 1)
+
+          if [ -z "$RESULT_FILE" ]; then
             echo "❌ No results.xml found. Did cocotb tests run correctly?"
             ls -R .
             exit 1
           fi
 
-          if grep -q 'failures="0"' results.xml; then
+          echo "📄 Found results.xml at $RESULT_FILE"
+
+          if grep -q 'failures="0"' "$RESULT_FILE"; then
             echo "✅ All tests passed."
           else
             echo "❌ Test(s) failed."
@@ -44,15 +49,14 @@ jobs:
       - name: Test Summary
         uses: test-summary/action@v2.3
         with:
-          paths: "test/results.xml"
+          paths: "test/**/*.xml"
         if: always()
 
-      - name: Upload VCD
+      - name: Upload VCD and Results
         if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-vcd
+          name: test-artifacts
           path: |
-            test/*.vcd
-            test/results.xml
-            test/sim_build/results.xml
+            test/**/*.vcd
+            test/**/*.xml
