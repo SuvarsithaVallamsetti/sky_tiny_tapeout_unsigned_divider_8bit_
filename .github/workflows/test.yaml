@@ -24,22 +24,22 @@ jobs:
 
       - name: Run tests
         run: |
-        cd test
-        make clean
-        make
-        if [ ! -f results.xml ]; then
-          echo "❌ No results.xml found. Did cocotb tests run correctly?"
-          ls -R .
-          exit 1
-        fi
+          cd test
+          make clean
+          make
 
-        if grep -q "<failure" results.xml; then
-          echo "❌ Test failed."
-          exit 1
-        else
-          echo "✅ All tests passed."
-        fi
+          if [ ! -f results.xml ]; then
+            echo "❌ No results.xml found. Did cocotb tests run correctly?"
+            ls -R .
+            exit 1
+          fi
 
+          if grep -q 'failures="0"' results.xml; then
+            echo "✅ All tests passed."
+          else
+            echo "❌ Test(s) failed."
+            exit 1
+          fi
 
       - name: Test Summary
         uses: test-summary/action@v2.3
@@ -53,5 +53,6 @@ jobs:
         with:
           name: test-vcd
           path: |
-            test/tb.vcd
+            test/*.vcd
             test/results.xml
+            test/sim_build/results.xml
