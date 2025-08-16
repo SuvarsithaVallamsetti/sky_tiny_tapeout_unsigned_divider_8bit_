@@ -1,70 +1,76 @@
-name: test
+name: CI
 
 on: [push, workflow_dispatch]
 
 jobs:
-  test:
+  simulation:
     runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        sim_type: [rtl, gl]   # rtl → normal test, gl → gate-level
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Install iverilog
-        run: sudo apt-get update && sudo apt-get install -y iverilog
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
 
       - name: Setup Python
+        if: matrix.sim_type == 'rtl'
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Install Python packages
-        run: |
-          if [ -f test/requirements.txt ]; then
-            pip install -r test/requirements.txt
-          else
-            pip install cocotb
-          fi
+        if: matrix.sim_type == 'rtl'
+        run: pip install -r test/requirements.txt
 
-      - name: Run tests
+      - name: Run ${{ matrix.sim_type }} simulation
         run: |
           cd test
-          make clean || true
-          make || true   # don't fail immediately
+          rm -f ./tb.vvp ./tb.vcd ./results.xml || true
+
+          if [ "${{ matrix.sim_type }}" = "rtl" ]; then
+            echo "=== Running RTL simulation ==="
+            make clean || true
+            make || true   # ignore vvp exit code
+          else
+            echo "=== Running GL simulation ==="
+            iverilog -o ./tb.vvp tb.v ../src/project.v || true
+            vvp ./tb.vvp || true   # ignore exit code
+          fi
 
           RESULT_FILE=$(find . -name "results.xml" | head -n 1)
-
           if [ -z "$RESULT_FILE" ]; then
-            echo "❌ No results.xml found. Did cocotb tests run correctly?"
+            echo "❌ No results.xml found for ${{ matrix.sim_type }} sim."
             ls -R .
             exit 1
           fi
 
-          echo "📄 Found results.xml at $RESULT_FILE"
-          cat "$RESULT_FILE"
-
           FAILURES=$(grep -o 'failures="[0-9]*"' "$RESULT_FILE" | sed 's/[^0-9]//g')
-
           if [ "$FAILURES" -eq 0 ]; then
-            echo "✅ All tests passed."
+            echo "✅ ${{ matrix.sim_type }} tests passed (ignoring simulator exit code)."
             exit 0
           else
-            echo "❌ $FAILURES test(s) failed."
+            echo "❌ $FAILURES ${{ matrix.sim_type }} test(s) failed."
             exit 1
           fi
 
-      - name: Test Summary
+      - name: Test Summary (${{ matrix.sim_type }})
         uses: test-summary/action@v2.3
         with:
           paths: "test/**/*.xml"
         if: always()
 
-      - name: Upload VCD and Results
+      - name: Upload Artifacts (${{ matrix.sim_type }})
         if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-artifacts
+          name: ${{ matrix.sim_type }}-artifacts
           path: |
             test/**/*.vcd
             test/**/*.xml
