@@ -21,7 +21,7 @@ jobs:
       - name: Install Python packages
         run: pip install -r test/requirements.txt
 
-      - name: Run tests
+      - name: Run tests (grep version)
         run: |
           cd test
           make clean
@@ -36,6 +36,9 @@ jobs:
           fi
 
           echo "📄 Found results.xml at $RESULT_FILE"
+          echo "---- File contents ----"
+          cat "$RESULT_FILE"
+          echo "-----------------------"
 
           if grep -q 'failures="[1-9]' "$RESULT_FILE"; then
             echo "❌ Test(s) failed."
