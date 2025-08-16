@@ -1,4 +1,5 @@
 name: test
+
 on: [push, workflow_dispatch]
 
 jobs:
@@ -10,18 +11,24 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install iverilog + xmllint
-        run: sudo apt-get update && sudo apt-get install -y iverilog libxml2-utils
+      - name: Install iverilog
+        run: sudo apt-get update && sudo apt-get install -y iverilog
 
-      - name: Setup python
+      # Setup Python and install cocotb + deps
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Install Python packages
-        run: pip install -r test/requirements.txt
+        run: |
+          if [ -f test/requirements.txt ]; then
+            pip install -r test/requirements.txt
+          else
+            pip install cocotb
+          fi
 
-      - name: Run tests (xmllint version)
+      - name: Run tests
         run: |
           cd test
           make clean
@@ -31,16 +38,19 @@ jobs:
 
           if [ -z "$RESULT_FILE" ]; then
             echo "❌ No results.xml found. Did cocotb tests run correctly?"
+            ls -R .
             exit 1
           fi
 
           echo "📄 Found results.xml at $RESULT_FILE"
-          FAILURES=$(xmllint --xpath "string(/testsuite/@failures)" "$RESULT_FILE")
+          cat "$RESULT_FILE"
 
-          echo "Detected failures=$FAILURES"
+          # Extract number of failures
+          FAILURES=$(grep -o 'failures="[0-9]*"' "$RESULT_FILE" | sed 's/[^0-9]//g')
 
           if [ "$FAILURES" -eq 0 ]; then
             echo "✅ All tests passed."
+            exit 0
           else
             echo "❌ $FAILURES test(s) failed."
             exit 1
@@ -53,7 +63,7 @@ jobs:
         if: always()
 
       - name: Upload VCD and Results
-        if: always()
+        if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
           name: test-artifacts
