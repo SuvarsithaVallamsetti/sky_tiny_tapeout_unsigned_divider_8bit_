@@ -32,18 +32,48 @@ module tb;
     initial clk = 0;
     always #10 clk = ~clk;
 
+    // Task to apply one test and check result
+    task run_test(input [7:0] dividend, input [7:0] divisor);
+        reg [3:0] exp_q;
+        reg [3:0] exp_r;
+    begin
+        ui_in  = dividend;
+        uio_in = divisor;
+
+        // wait a few cycles for DUT to process
+        repeat (5) @(posedge clk);
+
+        exp_q = dividend / divisor;
+        exp_r = dividend % divisor;
+
+        if (quotient !== exp_q || remainder !== exp_r) begin
+            $display("❌ FAIL: %0d / %0d → got Q=%0d R=%0d, expected Q=%0d R=%0d",
+                     dividend, divisor, quotient, remainder, exp_q, exp_r);
+        end else begin
+            $display("✅ PASS: %0d / %0d = Q=%0d R=%0d",
+                     dividend, divisor, quotient, remainder);
+        end
+    end
+    endtask
+
     initial begin
         // Output dump
-       $dumpfile("tb.vcd");
+        $dumpfile("tb.vcd");
         $dumpvars(0, tb);
 
-        rst_n = 1;
+        // Reset
+        rst_n = 0;
         ena   = 1;
+        ui_in = 0;
+        uio_in = 1;
+        repeat (2) @(posedge clk);
+        rst_n = 1;
 
-        // Test cases
-        ui_in  = 8'd100; uio_in = 8'd7;   #100;
-        ui_in  = 8'd200; uio_in = 8'd15;  #100;
-        ui_in  = 8'd255; uio_in = 8'd3;   #100;
+        // Run tests
+        run_test(100, 7);
+        run_test(200, 15);
+        run_test(255, 3);
+        run_test(123, 5);
 
         $display("Simulation finished.");
         $finish;
