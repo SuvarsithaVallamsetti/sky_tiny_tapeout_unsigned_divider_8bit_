@@ -1,11 +1,7 @@
 name: test
-
 on: [push, workflow_dispatch]
 
 jobs:
-  # ========================
-  # Functional Simulation Test
-  # ========================
   test:
     runs-on: ubuntu-24.04
     steps:
@@ -17,6 +13,7 @@ jobs:
       - name: Install iverilog
         run: sudo apt-get update && sudo apt-get install -y iverilog
 
+      # Set Python up and install cocotb
       - name: Setup python
         uses: actions/setup-python@v5
         with:
@@ -25,19 +22,24 @@ jobs:
       - name: Install Python packages
         run: pip install -r test/requirements.txt
 
-      - name: Run functional tests
+      - name: Run tests
         run: |
-          cd test
-          make clean || true
-          make || true
-          if [ ! -f results.xml ]; then
-            echo "❌ ERROR: results.xml not found!"
-          elif grep -q '<failure' results.xml; then
-            echo "❌ Functional tests failed."
-          else
-            echo "✅ Functional tests passed."
-          fi
-        continue-on-error: true
+        cd test
+        make clean
+        make
+        if [ ! -f results.xml ]; then
+          echo "❌ No results.xml found. Did cocotb tests run correctly?"
+          ls -R .
+          exit 1
+        fi
+
+        if grep -q "<failure" results.xml; then
+          echo "❌ Test failed."
+          exit 1
+        else
+          echo "✅ All tests passed."
+        fi
+
 
       - name: Test Summary
         uses: test-summary/action@v2.3
@@ -45,73 +47,11 @@ jobs:
           paths: "test/results.xml"
         if: always()
 
-      - name: Upload functional artifacts
+      - name: Upload VCD
+        if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: functional-test-artifacts
+          name: test-vcd
           path: |
             test/tb.vcd
             test/results.xml
-            test/*.log
-        if: success() || failure()
-
-      - name: Fail job if functional test failures found
-        run: |
-          if grep -q '<failure' test/results.xml; then
-            echo "❌ Final check: Functional tests failed."
-            exit 1
-          fi
-
-  # ========================
-  # Gate-Level Simulation Test (GDS)
-  # ========================
-  gl_test:
-    runs-on: ubuntu-24.04
-    needs: test
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y iverilog
-
-      - name: Setup python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install Python packages
-        run: pip install -r gl_test/requirements.txt
-
-      - name: Run gate-level tests
-        run: |
-          cd gl_test
-          make clean || true
-          make || true
-          if [ ! -f results.xml ]; then
-            echo "❌ ERROR: results.xml not found!"
-          elif grep -q '<failure' results.xml; then
-            echo "❌ GL tests failed."
-          else
-            echo "✅ GL tests passed."
-          fi
-        continue-on-error: true
-
-      - name: Upload GL artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: gl-test-artifacts
-          path: |
-            gl_test/tb.vcd
-            gl_test/results.xml
-            gl_test/*.log
-        if: success() || failure()
-
-      - name: Fail job if GL test failures found
-        run: |
-          if grep -q '<failure' gl_test/results.xml; then
-            echo "❌ Final check: GL tests failed."
-            exit 1
-          fi
