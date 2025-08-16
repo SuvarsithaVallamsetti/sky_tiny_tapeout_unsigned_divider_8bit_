@@ -37,22 +37,32 @@ jobs:
           if [ "${{ matrix.sim_type }}" = "rtl" ]; then
             echo "=== Running RTL simulation ==="
             make clean || true
-            make || true   # ignore vvp exit code
+            make || true   # don't fail on vvp exit code
           else
             echo "=== Running GL simulation ==="
             iverilog -o ./tb.vvp tb.v ../src/project.v || true
-            vvp ./tb.vvp || true   # ignore exit code
+            vvp ./tb.vvp || true   # don't fail on vvp exit code
           fi
 
           RESULT_FILE=$(find . -name "results.xml" | head -n 1)
+
           if [ -z "$RESULT_FILE" ]; then
             echo "❌ No results.xml found for ${{ matrix.sim_type }} sim."
             ls -R .
             exit 1
           fi
 
-          FAILURES=$(grep -o 'failures="[0-9]*"' "$RESULT_FILE" | sed 's/[^0-9]//g')
-          if [ "$FAILURES" -eq 0 ]; then
+          echo "📄 Found results.xml at $RESULT_FILE"
+          echo "----- results.xml content -----"
+          cat "$RESULT_FILE" || true
+          echo "-------------------------------"
+
+          FAILURES=$(grep -o 'failures="[0-9]*"' "$RESULT_FILE" | sed 's/[^0-9]//g' || echo "0")
+
+          if [ "$FAILURES" = "" ]; then
+            echo "⚠️ Could not parse failures count, assuming fail."
+            exit 1
+          elif [ "$FAILURES" -eq 0 ]; then
             echo "✅ ${{ matrix.sim_type }} tests passed (ignoring simulator exit code)."
             exit 0
           else
