@@ -14,7 +14,6 @@ jobs:
       - name: Install iverilog
         run: sudo apt-get update && sudo apt-get install -y iverilog
 
-      # Setup Python and install cocotb + deps
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -31,8 +30,8 @@ jobs:
       - name: Run tests
         run: |
           cd test
-          make clean
-          make
+          make clean || true
+          make || true   # don't fail immediately
 
           RESULT_FILE=$(find . -name "results.xml" | head -n 1)
 
@@ -45,7 +44,6 @@ jobs:
           echo "📄 Found results.xml at $RESULT_FILE"
           cat "$RESULT_FILE"
 
-          # Extract number of failures
           FAILURES=$(grep -o 'failures="[0-9]*"' "$RESULT_FILE" | sed 's/[^0-9]//g')
 
           if [ "$FAILURES" -eq 0 ]; then
