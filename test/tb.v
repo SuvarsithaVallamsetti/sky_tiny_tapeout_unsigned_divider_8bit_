@@ -76,7 +76,8 @@ module tb;
         run_test(123, 5);
 
         $display("Simulation finished.");
-        $finish;
+       $finish_and_return(0);
+
     end
 
 endmodule
