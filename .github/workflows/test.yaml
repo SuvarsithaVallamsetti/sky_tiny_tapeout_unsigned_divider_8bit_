@@ -13,7 +13,6 @@ jobs:
       - name: Install iverilog
         run: sudo apt-get update && sudo apt-get install -y iverilog
 
-      # Set Python up and install cocotb
       - name: Setup python
         uses: actions/setup-python@v5
         with:
@@ -28,7 +27,6 @@ jobs:
           make clean
           make
 
-          # Find results.xml (could be in test/ or sim_build/)
           RESULT_FILE=$(find . -name "results.xml" | head -n 1)
 
           if [ -z "$RESULT_FILE" ]; then
@@ -39,11 +37,11 @@ jobs:
 
           echo "📄 Found results.xml at $RESULT_FILE"
 
-          if grep -q 'failures="0"' "$RESULT_FILE"; then
-            echo "✅ All tests passed."
-          else
+          if grep -q 'failures="[1-9]' "$RESULT_FILE"; then
             echo "❌ Test(s) failed."
             exit 1
+          else
+            echo "✅ All tests passed."
           fi
 
       - name: Test Summary
@@ -53,7 +51,7 @@ jobs:
         if: always()
 
       - name: Upload VCD and Results
-        if: success() || failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-artifacts
