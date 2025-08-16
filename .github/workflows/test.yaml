@@ -1,5 +1,9 @@
 name: test
-on: [push, workflow_dispatch]
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   test:
@@ -13,8 +17,7 @@ jobs:
       - name: Install iverilog
         run: sudo apt-get update && sudo apt-get install -y iverilog
 
-      # Set Python up and install cocotb
-      - name: Setup python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -28,6 +31,7 @@ jobs:
           make clean
           make
 
+          # Find results.xml
           RESULT_FILE=$(find . -name "results.xml" | head -n 1)
 
           if [ -z "$RESULT_FILE" ]; then
@@ -41,7 +45,7 @@ jobs:
             echo "❌ Test(s) failed."
             echo "result=failed" >> $GITHUB_ENV
           fi
-        continue-on-error: true   # <-- don't fail job on exit 1
+        continue-on-error: true   # don’t fail job, just record status
 
       - name: Test Summary
         uses: test-summary/action@v2.3
@@ -59,4 +63,4 @@ jobs:
             test/**/*.xml
 
       - name: Report status
-        run: echo "Final test result: ${{ env.result }}"
+        run: echo "📢 Final test result: ${{ env.result }}"
