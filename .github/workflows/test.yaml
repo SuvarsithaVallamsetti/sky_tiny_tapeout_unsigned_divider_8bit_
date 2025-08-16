@@ -1,9 +1,5 @@
 name: test
-
-on:
-  push:
-  pull_request:
-  workflow_dispatch:
+on: [push, workflow_dispatch]
 
 jobs:
   test:
@@ -17,7 +13,8 @@ jobs:
       - name: Install iverilog
         run: sudo apt-get update && sudo apt-get install -y iverilog
 
-      - name: Setup Python
+      # Set Python up and install cocotb
+      - name: Setup python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -31,21 +28,23 @@ jobs:
           make clean
           make
 
-          # Find results.xml
+          # Find results.xml (could be in test/ or sim_build/)
           RESULT_FILE=$(find . -name "results.xml" | head -n 1)
 
           if [ -z "$RESULT_FILE" ]; then
             echo "❌ No results.xml found. Did cocotb tests run correctly?"
             ls -R .
-            echo "result=missing" >> $GITHUB_ENV
-          elif grep -q 'failures="0"' "$RESULT_FILE"; then
+            exit 1
+          fi
+
+          echo "📄 Found results.xml at $RESULT_FILE"
+
+          if grep -q 'failures="0"' "$RESULT_FILE"; then
             echo "✅ All tests passed."
-            echo "result=passed" >> $GITHUB_ENV
           else
             echo "❌ Test(s) failed."
-            echo "result=failed" >> $GITHUB_ENV
+            exit 1
           fi
-        continue-on-error: true   # don’t fail job, just record status
 
       - name: Test Summary
         uses: test-summary/action@v2.3
@@ -54,13 +53,10 @@ jobs:
         if: always()
 
       - name: Upload VCD and Results
-        if: always()
+        if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
           name: test-artifacts
           path: |
             test/**/*.vcd
             test/**/*.xml
-
-      - name: Report status
-        run: echo "📢 Final test result: ${{ env.result }}"
